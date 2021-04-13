@@ -38,16 +38,15 @@ resource_field = {
     "people" : fields.String,
 }
 
-
-def notfoundCity(city_id):
-    if city_id not in mycity:
-        abort(404, message="province not found.")
-
 class WeatherCity(Resource):
     @marshal_with(resource_field)
     def get(self, city_id):
-        notfoundCity(city_id)
-        return mycity[city_id]
+        result = CityModel.query.filter_by(id=city_id).first()
+        
+        if not result:
+            abort(404,message="province not found")
+
+        return result
 
     @marshal_with(resource_field)
     def post(self, city_id):
