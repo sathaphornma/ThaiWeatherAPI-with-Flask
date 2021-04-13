@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, abort
 
 app = Flask(__name__)
 api = Api(app)
@@ -22,13 +22,19 @@ mycity = {
     },
 } 
 
+
+def notfoundCity(city_id):
+    if city_id not in mycity:
+        abort(404, message="data not found.")
+
 class WeatherCity(Resource):
 
     def get(self, city_id):
+        notfoundCity(city_id)
         return mycity[city_id]
 
     def post(self, city_id):
-        return {"data": "post data : " + str(city_id)}
+        return {"data": "post city id : " + str(city_id)}
         
 
 
