@@ -1,14 +1,15 @@
 from flask import Flask
-from flask_restful import Api, Resource, abort
+from flask_restful import Api, Resource, abort, reqparse
 from flask_sqlalchemy import SQLAlchemy, Model
 
 app = Flask(__name__)
 
-# Database
+# Create Database
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI']="sqlite:///database.db"
 api = Api(app)
 
+# Design Database
 class CityModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -21,42 +22,49 @@ class CityModel(db.Model):
 
 db.create_all()
 
-"""
+# Request Parser
+city_add_args = reqparse.RequestParser()
+city_add_args.add_argument("name", type=str, required=True, help="please enter text for provice.")
+city_add_args.add_argument("temp", type=str, required=True, help="please enter text for temp.")
+city_add_args.add_argument("weather", type=str, required=True, help="please enter text for weather.")
+city_add_args.add_argument("people", type=str, required=True, help="please enter text for people.")
+
 mycity = {
-    1 : {
+    "chonburi" : {
         "name" : "chonburi",
         "weather" : "hot",
         "people" : 1000,
     },
-    2 : {
+    "rayong" : {
         "name" : "rayong",
         "weather" : "very hot",
         "people" : 2000,
     },
-    3 : {
+    "bangkok" : {
         "name" : "bangkok",
         "weather" : "cloud",
         "people" : 3000,
     },
-} """
+}
 
 
-def notfoundCity(city_id):
-    if city_id not in mycity:
-        abort(404, message="data not found.")
+def notfoundCity(name):
+    if name not in mycity:
+        abort(404, message="province not found.")
 
 class WeatherCity(Resource):
 
-    def get(self, city_id):
-        notfoundCity(city_id)
-        return mycity[city_id]
+    def get(self, name):
+        notfoundCity(name)
+        return mycity[name]
 
-    def post(self, city_id):
-        return {"data": "post city id : " + str(city_id)}
+    def post(self, name):
+        args = city_add_args.parse_args()
+        return args
         
 
 
-api.add_resource(WeatherCity,"/weather/<int:city_id>")
+api.add_resource(WeatherCity,"/weather/<string:name>")
 
 
 if __name__ == "__main__":
