@@ -42,14 +42,18 @@ class WeatherCity(Resource):
     @marshal_with(resource_field)
     def get(self, city_id):
         result = CityModel.query.filter_by(id=city_id).first()
-        
+
         if not result:
-            abort(404,message="province not found")
+            abort(404,message="Province is not found")
 
         return result
 
     @marshal_with(resource_field)
     def post(self, city_id):
+        result = CityModel.query.filter_by(id=city_id).first()
+        if result:
+            abort(409, message="Province ID is duplicate.")
+
         args = city_add_args.parse_args()
         city = CityModel(
             id=city_id, 
