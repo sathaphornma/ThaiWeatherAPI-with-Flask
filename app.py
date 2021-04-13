@@ -1,9 +1,27 @@
 from flask import Flask
 from flask_restful import Api, Resource, abort
+from flask_sqlalchemy import SQLAlchemy, Model
 
 app = Flask(__name__)
+
+# Database
+db = SQLAlchemy(app)
+app.config['SQLALCHEMY_DATABASE_URI']="sqlite:///database.db"
 api = Api(app)
 
+class CityModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    temp = db.Column(db.String(100), nullable=False)
+    weather = db.Column(db.String(100), nullable=False)
+    people = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self): # represent
+        return f"City(name={name}, temp={temp}, weather={weather}, people={people})"
+
+db.create_all()
+
+"""
 mycity = {
     1 : {
         "name" : "chonburi",
@@ -20,7 +38,7 @@ mycity = {
         "weather" : "cloud",
         "people" : 3000,
     },
-} 
+} """
 
 
 def notfoundCity(city_id):
