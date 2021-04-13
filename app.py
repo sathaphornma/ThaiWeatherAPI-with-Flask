@@ -24,10 +24,18 @@ db.create_all()
 
 # Request Parser
 city_add_args = reqparse.RequestParser()
-city_add_args.add_argument("name", type=str, required=True, help="please enter text for provice.")
-city_add_args.add_argument("temp", type=str, required=True, help="please enter text for temp.")
-city_add_args.add_argument("weather", type=str, required=True, help="please enter text for weather.")
-city_add_args.add_argument("people", type=str, required=True, help="please enter text for people.")
+city_add_args.add_argument("name", type=str, required=True, help="Please enter text for provice.")
+city_add_args.add_argument("temp", type=str, required=True, help="Please enter text for temp.")
+city_add_args.add_argument("weather", type=str, required=True, help="Please enter text for weather.")
+city_add_args.add_argument("people", type=str, required=True, help="Please enter text for people.")
+
+
+city_update_args = reqparse.RequestParser()
+city_update_args.add_argument("name", type=str, help="Please enter provice for update.")
+city_update_args.add_argument("temp", type=str, help="Please enter temp for update.")
+city_update_args.add_argument("weather", type=str, help="Please enter weather for update.")
+city_update_args.add_argument("people", type=str, help="Please enter people for update.")
+
 
 # Set Fields
 resource_field = {
@@ -66,8 +74,29 @@ class WeatherCity(Resource):
         db.session.add(city)
         db.session.commit()
         return city,201
-        
 
+    @marshal_with(resource_field)
+    def patch(self, city_id):
+        args = city_update_args.parse_args()
+        result = CityModel.query.filter_by(id=city_id).first()
+
+        if not result:
+            abort(404, message="Province ID is not found.")
+
+        if args["name"]:
+            result.name = args["name"]
+
+        if args["temp"]:
+            result.temp = args["temp"]
+
+        if args["weather"]:
+            result.weather = args["weather"]
+
+        if args["people"]:
+            result.people = args["people"]
+        
+        db.session.commit()
+        return result
 
 api.add_resource(WeatherCity,"/weather/<int:city_id>")
 
